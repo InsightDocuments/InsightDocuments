@@ -1,9 +1,10 @@
 import os
 import boto3
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
-# Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Configure upload folder (local storage for temporary file handling)
 UPLOAD_FOLDER = 'uploads'
@@ -94,3 +95,19 @@ def upload_file():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+@app.route('/query', methods=['POST'])
+def query_document():
+    data = request.get_json()
+    question = data.get("question")
+
+    if not question:
+        return jsonify({"error": "Question is required"}), 400
+
+    # Mock response for now
+    response = {
+        "answer": f"Mock answer to the question: '{question}'",
+        "reference": "Page 1, Section 2"
+    }
+
+    return jsonify(response), 200
