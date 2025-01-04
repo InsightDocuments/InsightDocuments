@@ -1,44 +1,62 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState } from 'react';
+import axios from 'axios';
 
 const SearchBar = () => {
-    const [query, setQuery] = useState("");
-    const [response, setResponse] = useState("");
+    const [question, setQuestion] = useState(''); // State for user input
+    const [response, setResponse] = useState(null); // State for API response
+    const [error, setError] = useState(null); // State for errors
 
-    const handleInputChange = (event) => {
-        setQuery(event.target.value);
+    const handleSearch = async () => {
+        try {
+            setError(null); // Clear previous errors
+            const res = await axios.post('http://127.0.0.1:5000/query', {
+                question: question,
+            });
+            setResponse(res.data); // Save response to state
+        } catch (err) {
+            setError('Error querying the backend. Please try again.');
+            console.error(err);
+        }
     };
 
-const handleSearch = async () => {
-    if (!query) {
-        setResponse("Please enter a query.");
-        return;
-    }
-
-    try {
-        const res = await axios.post("http://127.0.0.1:5000/query", {
-            question: query,
-        });
-        setResponse(`Answer: ${res.data.answer}\nReference: ${res.data.reference}`);
-    } catch (error) {
-        setResponse("Error: Unable to process your query. Please try again later.");
-    }
-};
-
     return (
-        <div>
-            <h2>Search Your Document</h2>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <h2>Ask a Question</h2>
             <input
                 type="text"
-                value={query}
-                onChange={handleInputChange}
                 placeholder="Enter your question here"
-                style={{ width: "300px", padding: "5px" }}
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                style={{
+                    width: '300px',
+                    padding: '10px',
+                    marginBottom: '10px',
+                }}
             />
-            <button onClick={handleSearch} style={{ marginLeft: "10px", padding: "5px" }}>
+            <br />
+            <button
+                onClick={handleSearch}
+                style={{
+                    padding: '10px 20px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                }}
+            >
                 Search
             </button>
-            {response && <p>{response}</p>}
+            <div style={{ marginTop: '20px' }}>
+                {response && (
+                    <div>
+                        <p>
+                            <strong>Answer:</strong> {response.answer}
+                        </p>
+                        <p>
+                            <strong>Reference:</strong> {response.reference}
+                        </p>
+                    </div>
+                )}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+            </div>
         </div>
     );
 };
